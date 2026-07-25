@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment files (never commit real secrets)
+.env
+.env.*
+!.env.example
+apps/web/.env
+apps/web/.env.*
+!apps/web/.env.example
+apps/api/.env
+apps/api/.env.*
+!apps/api/.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor/OS
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+
+# Supabase CLI local state
+supabase/.temp/
+
+# Temporary/local test artifacts
+coverage/
+*.tmp
+tmp/
+.tmp/
+test-results/
+playwright-report/

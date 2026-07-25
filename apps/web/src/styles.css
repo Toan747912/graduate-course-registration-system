@@ -1,0 +1,401 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: canvas;
+  color: canvastext;
+}
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.page-centered {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.card {
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.form {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* Wider variant for forms that lay out fields in a grid (see .form-grid-2)
+   instead of the default single narrow column. */
+.form-wide {
+  max-width: 640px;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.field-inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 1rem 0;
+}
+
+input,
+select,
+button {
+  font: inherit;
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+}
+
+button {
+  cursor: pointer;
+  background: color-mix(in srgb, canvastext 8%, canvas);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* Keyboard focus must be clearly visible on every interactive element,
+   independent of light/dark theme (currentColor tracks each element's own
+   text color, so it stays visible against either canvas background). */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Button-styled link (e.g. "Xem chi tiết" in a table action column), sized
+   so its label never wraps at normal column widths. */
+.button-link {
+  display: inline-block;
+  min-width: 8rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  background: color-mix(in srgb, canvastext 8%, canvas);
+  color: inherit;
+  text-decoration: none;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.button-link:hover {
+  background: color-mix(in srgb, canvastext 14%, canvas);
+}
+
+.error-text {
+  color: #c0392b;
+  margin: 0;
+}
+
+.result-text {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+}
+
+.result-ok {
+  color: #1e7e34;
+}
+
+.result-error {
+  color: #c0392b;
+}
+
+.nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+}
+
+.nav-link {
+  text-decoration: none;
+  color: inherit;
+  font-weight: 500;
+  background: none;
+  border: none;
+  padding: 0.25rem 0;
+}
+
+.nav-link-active {
+  border-bottom: 2px solid currentColor;
+}
+
+.nav-logout {
+  margin-left: auto;
+}
+
+.banner {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin: 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.banner-error {
+  background: color-mix(in srgb, #c0392b 12%, transparent);
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.current-semester {
+  margin: 0 0 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.classes-table {
+  table-layout: auto;
+}
+
+.classes-table th:nth-child(2),
+.classes-table th:nth-child(3),
+.classes-table th:nth-child(6) {
+  white-space: nowrap;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  vertical-align: top;
+}
+
+.cell-nowrap {
+  white-space: nowrap;
+}
+
+.schedule-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.badge-open {
+  background: color-mix(in srgb, #1e7e34 20%, canvas);
+  color: #145a24;
+  border-color: color-mix(in srgb, #1e7e34 45%, transparent);
+}
+
+.badge-full {
+  background: color-mix(in srgb, #c0392b 20%, canvas);
+  color: #8f2a1f;
+  border-color: color-mix(in srgb, #c0392b 45%, transparent);
+}
+
+.badge-confirmed {
+  background: color-mix(in srgb, #1e7e34 20%, canvas);
+  color: #145a24;
+  border-color: color-mix(in srgb, #1e7e34 45%, transparent);
+}
+
+.badge-upcoming {
+  background: color-mix(in srgb, #b8860b 20%, canvas);
+  color: #7a5900;
+  border-color: color-mix(in srgb, #b8860b 45%, transparent);
+}
+
+.badge-closed {
+  background: color-mix(in srgb, #555 20%, canvas);
+  color: color-mix(in srgb, #333 80%, canvastext);
+  border-color: color-mix(in srgb, #555 45%, transparent);
+}
+
+.badge-rejected,
+.badge-cancelled_by_school {
+  background: color-mix(in srgb, #c0392b 20%, canvas);
+  color: #8f2a1f;
+  border-color: color-mix(in srgb, #c0392b 45%, transparent);
+}
+
+.badge-cancelled_by_student {
+  background: color-mix(in srgb, #555 20%, canvas);
+  color: color-mix(in srgb, #333 80%, canvastext);
+  border-color: color-mix(in srgb, #555 45%, transparent);
+}
+
+.button-enrolled {
+  opacity: 1;
+  background: color-mix(in srgb, #1e7e34 15%, canvas);
+  color: #145a24;
+  border-color: color-mix(in srgb, #1e7e34 40%, transparent);
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .classes-table,
+  .classes-table thead,
+  .classes-table tbody,
+  .classes-table tr,
+  .classes-table th,
+  .classes-table td {
+    display: block;
+  }
+
+  .classes-table {
+    min-width: 0;
+  }
+
+  .classes-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .classes-table tr {
+    border: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .classes-table td {
+    border-bottom: none;
+    padding: 0.35rem 0;
+    white-space: normal;
+  }
+
+  .classes-table td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: color-mix(in srgb, currentColor 65%, transparent);
+    margin-bottom: 0.15rem;
+  }
+}
+
+.schedule-fieldset {
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-radius: 8px;
+  padding: 0.75rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.schedule-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.schedule-row .field {
+  min-width: 140px;
+  flex: 1 1 140px;
+}
+
+@media (max-width: 640px) {
+  .schedule-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.history-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.history-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.transition-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.transition-list time {
+  margin-left: 0.5rem;
+  color: color-mix(in srgb, currentColor 60%, transparent);
+}
+
+.reason-text {
+  color: color-mix(in srgb, currentColor 70%, transparent);
+}
+
+.history-card-actions {
+  display: flex;
+}

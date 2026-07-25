@@ -1,0 +1,21 @@
+# Render Blueprint cho backend Express/TypeScript (apps/api) trong monorepo npm
+# workspaces. Không set `rootDir` vì apps/api phụ thuộc vào package-lock.json và
+# node_modules gốc của workspace — build/start command chạy từ root repo và
+# target đúng workspace bằng `--workspace apps/api`.
+#
+# Sau khi tạo service từ blueprint này trên Render, vào Dashboard > Environment
+# và điền giá trị thật cho 3 biến bên dưới (không có giá trị nào được đặt ở đây).
+services:
+  - type: web
+    name: gcrs-api
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build --workspace apps/api
+    startCommand: npm run start --workspace apps/api
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false

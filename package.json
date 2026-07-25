@@ -1,0 +1,24 @@
+{
+  "name": "graduate-course-registration-system",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": "22.22.0"
+  },
+  "workspaces": [
+    "apps/web",
+    "apps/api"
+  ],
+  "scripts": {
+    "dev": "concurrently -n web,api -c blue,green \"npm run dev:web\" \"npm run dev:api\"",
+    "dev:web": "npm run dev --workspace apps/web",
+    "dev:api": "npm run dev --workspace apps/api",
+    "build": "npm run build --workspace apps/api && npm run build --workspace apps/web",
+    "typecheck": "npm run typecheck --workspace apps/api && npm run typecheck --workspace apps/web",
+    "lint": "npm run lint --workspace apps/api && npm run lint --workspace apps/web",
+    "seed:demo-users": "npm run seed:demo-users --workspace apps/api"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
+}
