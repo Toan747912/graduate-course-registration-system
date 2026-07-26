@@ -7,8 +7,11 @@ export function StudentNav(): JSX.Element {
   const { signOut } = useAuth();
 
   const handleLogout = async (): Promise<void> => {
-    await signOut();
-    navigate('/login', { replace: true });
+    try {
+      await signOut();
+    } finally {
+      navigate('/login', { replace: true });
+    }
   };
 
   const linkClassName = ({ isActive }: { isActive: boolean }): string =>

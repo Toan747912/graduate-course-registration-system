@@ -69,6 +69,12 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
   }, [session]);
 
   const signOut = async (): Promise<void> => {
+    // Clear local state immediately rather than waiting for the async
+    // onAuthStateChange listener, so RequireRole/UI reflect the logged-out
+    // state right away even if the network call is slow.
+    setProfile(null);
+    setProfileStatus('idle');
+    setSession(null);
     await supabase.auth.signOut();
   };
 

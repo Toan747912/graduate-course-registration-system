@@ -272,6 +272,52 @@ td {
   border-color: color-mix(in srgb, #555 45%, transparent);
 }
 
+.confirm-dialog {
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-radius: 8px;
+  padding: 0;
+  max-width: 420px;
+  width: calc(100% - 2rem);
+  background: canvas;
+  color: canvastext;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.confirm-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.dialog-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.dialog-body h3 {
+  margin: 0;
+}
+
+.dialog-body p {
+  margin: 0;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+body:has(dialog[open]) {
+  overflow: hidden;
+}
+
+.button-confirm {
+  background: color-mix(in srgb, #b8860b 20%, canvas);
+  color: #7a5900;
+  border-color: color-mix(in srgb, #b8860b 45%, transparent);
+}
+
 .button-enrolled {
   opacity: 1;
   background: color-mix(in srgb, #1e7e34 15%, canvas);

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { StudentNav } from '../../components/StudentNav';
 import { apiFetch, ApiRequestError } from '../../lib/api';
 import type { EnrollmentActionResult, EnrollmentWithHistory } from '../../types/api';
@@ -32,6 +32,15 @@ export function StudentHistory(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [cancelMessages, setCancelMessages] = useState<Record<string, { ok: boolean; text: string }>>({});
+  const [cancelTarget, setCancelTarget] = useState<EnrollmentWithHistory | null>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (cancelTarget && dialog && !dialog.open) {
+      dialog.showModal();
+    }
+  }, [cancelTarget]);
 
   const load = useCallback(async () => {
     setState('loading');
@@ -50,10 +59,13 @@ export function StudentHistory(): JSX.Element {
     load();
   }, [load]);
 
-  const handleCancel = async (enrollment: EnrollmentWithHistory): Promise<void> => {
-    const label = `${enrollment.course_classes.courses.code} (${enrollment.course_classes.class_code})`;
-    const confirmed = window.confirm(`Bạn có chắc muốn hủy đăng ký lớp ${label}?`);
-    if (!confirmed) {
+  const closeCancelDialog = (): void => {
+    setCancelTarget(null);
+  };
+
+  const handleConfirmCancel = async (): Promise<void> => {
+    const enrollment = cancelTarget;
+    if (!enrollment) {
       return;
     }
 
@@ -80,6 +92,7 @@ export function StudentHistory(): JSX.Element {
       }));
     } finally {
       setPendingId(null);
+      setCancelTarget(null);
       load();
     }
   };
@@ -130,7 +143,7 @@ export function StudentHistory(): JSX.Element {
 
                 {canCancel ? (
                   <div className="history-card-actions">
-                    <button type="button" disabled={isPending} onClick={() => handleCancel(enrollment)}>
+                    <button type="button" disabled={isPending} onClick={() => setCancelTarget(enrollment)}>
                       {isPending ? 'Đang gửi…' : 'Hủy'}
                     </button>
                   </div>
@@ -144,6 +157,29 @@ export function StudentHistory(): JSX.Element {
           })}
         </ul>
       ) : null}
+
+      <dialog ref={dialogRef} onClose={closeCancelDialog} className="confirm-dialog">
+        {cancelTarget ? (
+          <div className="dialog-body">
+            <h3>Xác nhận hủy đăng ký</h3>
+            <p>
+              Bạn có chắc muốn hủy đăng ký lớp{' '}
+              <strong>
+                {cancelTarget.course_classes.courses.code} ({cancelTarget.course_classes.class_code})
+              </strong>
+              ? Hành động này không thể hoàn tác.
+            </p>
+            <div className="dialog-actions">
+              <form method="dialog">
+                <button type="submit">Quay lại</button>
+              </form>
+              <button type="button" onClick={handleConfirmCancel} disabled={pendingId === cancelTarget.id}>
+                {pendingId === cancelTarget.id ? 'Đang gửi…' : 'Đồng ý hủy'}
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </dialog>
     </main>
   );
 }

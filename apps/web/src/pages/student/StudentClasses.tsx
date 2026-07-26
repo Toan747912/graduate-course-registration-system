@@ -39,7 +39,8 @@ export function StudentClasses(): JSX.Element {
   const [confirmedClassIds, setConfirmedClassIds] = useState<Set<string>>(new Set());
 
   const [pendingClassId, setPendingClassId] = useState<string | null>(null);
-  const [registerMessages, setRegisterMessages] = useState<Record<string, { ok: boolean; text: string }>>({});
+  const [confirmingClassId, setConfirmingClassId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ classId: string; ok: boolean; text: string } | null>(null);
 
   const loadSemesters = useCallback(async () => {
     setSemesterState('loading');
@@ -86,34 +87,45 @@ export function StudentClasses(): JSX.Element {
     }
   }, [selectedSemesterId, loadClasses]);
 
-  const handleRegister = async (classId: string): Promise<void> => {
+  const showToast = (classId: string, ok: boolean, text: string): void => {
+    setToast({ classId, ok, text });
+    setTimeout(() => {
+      setToast((prev) => (prev?.classId === classId ? null : prev));
+    }, 4000);
+  };
+
+  const executeRegistration = async (classId: string): Promise<void> => {
     setPendingClassId(classId);
     try {
       const result = await apiFetch<EnrollmentActionResult>('/student/enrollments', {
         method: 'POST',
         body: JSON.stringify({ classId }),
       });
-      setRegisterMessages((prev) => ({
-        ...prev,
-        [classId]: {
-          ok: result.success,
-          text: result.success ? 'Đăng ký thành công.' : (result.reason ?? 'Đăng ký không thành công.'),
-        },
-      }));
+      showToast(
+        classId,
+        result.success,
+        result.success ? 'Đăng ký thành công.' : (result.reason ?? 'Đăng ký không thành công.'),
+      );
     } catch (err) {
-      setRegisterMessages((prev) => ({
-        ...prev,
-        [classId]: {
-          ok: false,
-          text: err instanceof ApiRequestError ? err.message : 'Đăng ký không thành công.',
-        },
-      }));
+      showToast(classId, false, err instanceof ApiRequestError ? err.message : 'Đăng ký không thành công.');
     } finally {
       setPendingClassId(null);
       if (selectedSemesterId) {
         loadClasses(selectedSemesterId);
       }
     }
+  };
+
+  const handleRegisterClick = (classId: string): void => {
+    if (confirmingClassId === classId) {
+      setConfirmingClassId(null);
+      executeRegistration(classId);
+      return;
+    }
+    setConfirmingClassId(classId);
+    setTimeout(() => {
+      setConfirmingClassId((prev) => (prev === classId ? null : prev));
+    }, 3000);
   };
 
   const selectedSemester = semesters.find((semester) => semester.id === selectedSemesterId) ?? null;
@@ -181,9 +193,9 @@ export function StudentClasses(): JSX.Element {
                 </thead>
                 <tbody>
                   {classes.map((cls) => {
-                    const message = registerMessages[cls.class_id];
                     const isFull = cls.display_status === 'FULL';
                     const isPending = pendingClassId === cls.class_id;
+                    const isConfirming = confirmingClassId === cls.class_id;
                     const isEnrolled = confirmedClassIds.has(cls.class_id);
                     return (
                       <tr key={cls.class_id}>
@@ -223,14 +235,18 @@ export function StudentClasses(): JSX.Element {
                             <button
                               type="button"
                               disabled={isFull || isPending}
-                              onClick={() => handleRegister(cls.class_id)}
+                              className={isConfirming ? 'button-confirm' : undefined}
+                              onClick={() => handleRegisterClick(cls.class_id)}
                             >
-                              {isPending ? 'Đang gửi…' : 'Đăng ký'}
+                              {isPending ? 'Đang gửi…' : isConfirming ? 'Bấm lần nữa để xác nhận' : 'Đăng ký'}
                             </button>
                           )}
-                          {message ? (
-                            <p className={message.ok ? 'result-text result-ok' : 'result-text result-error'}>
-                              {message.text}
+                          {toast && toast.classId === cls.class_id ? (
+                            <p
+                              role="status"
+                              className={toast.ok ? 'result-text result-ok' : 'result-text result-error'}
+                            >
+                              {toast.text}
                             </p>
                           ) : null}
                         </td>

@@ -12,6 +12,11 @@ interface RequireRoleProps {
  * Every actual write goes through apps/api, which re-verifies the JWT and
  * role via requireAuth/requireRole regardless of what the frontend allowed.
  */
+const HOME_PATH_BY_ROLE: Record<AppRole, string> = {
+  STUDENT: '/student/classes',
+  TRAINING_STAFF: '/staff',
+};
+
 export function RequireRole({ allow, children }: RequireRoleProps): JSX.Element {
   const { session, profile, loading } = useAuth();
 
@@ -23,8 +28,12 @@ export function RequireRole({ allow, children }: RequireRoleProps): JSX.Element 
     return <Navigate to="/login" replace />;
   }
 
-  if (!profile || !allow.includes(profile.role)) {
+  if (!profile) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (!allow.includes(profile.role)) {
+    return <Navigate to={HOME_PATH_BY_ROLE[profile.role]} replace />;
   }
 
   return children;
