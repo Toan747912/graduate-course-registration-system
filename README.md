@@ -1,4 +1,6 @@
-# Graduate Course Registration System
+# Hệ thống Quản lý Học viên Cao học (Graduate Student Management System)
+
+MVP tập trung vào quản lý đăng ký học phần cho học viên cao học.
 
 Phase 1 codebase for the business analysis portfolio at
 [`../BA_Portfolio_Graduate_Course_Registration/`](../BA_Portfolio_Graduate_Course_Registration/README.md).
