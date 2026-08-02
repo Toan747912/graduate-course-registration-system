@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth, type AppRole } from '../context/AuthContext';
+import { resolveRouteGuardDecision } from './routeGuard';
 
 interface RequireRoleProps {
   allow: AppRole[];
@@ -12,28 +13,23 @@ interface RequireRoleProps {
  * Every actual write goes through apps/api, which re-verifies the JWT and
  * role via requireAuth/requireRole regardless of what the frontend allowed.
  */
-const HOME_PATH_BY_ROLE: Record<AppRole, string> = {
-  STUDENT: '/student/classes',
-  TRAINING_STAFF: '/staff',
-};
-
 export function RequireRole({ allow, children }: RequireRoleProps): JSX.Element {
-  const { session, profile, loading } = useAuth();
+  const { session, profile, profileStatus, loading } = useAuth();
 
-  if (loading) {
+  const decision = resolveRouteGuardDecision({
+    authLoading: loading,
+    session,
+    profileStatus,
+    profile,
+    allow,
+  });
+
+  if (decision.type === 'loading') {
     return <p>Loading...</p>;
   }
 
-  if (!session) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (!profile) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (!allow.includes(profile.role)) {
-    return <Navigate to={HOME_PATH_BY_ROLE[profile.role]} replace />;
+  if (decision.type === 'redirect') {
+    return <Navigate to={decision.to} replace />;
   }
 
   return children;
