@@ -101,13 +101,20 @@ Không có bảng "Khóa" độc lập với chương trình — mỗi khóa thu
 `courses.credits` (đã có ở migration 0003) là nguồn duy nhất cho tín chỉ môn học — không lưu lại ở đây.
 
 ### C.4 `profiles` — mở rộng (không sửa migration 0001, thêm cột qua migration mới)
+
+**CẬP NHẬT (Batch 2 triển khai thực tế, thay thế bảng dự thảo bên dưới):**
 | Cột thêm | Kiểu | Ghi chú |
 |---|---|---|
-| `program_id` | uuid FK → `programs`, nullable | null cho staff; **NOT NULL** cho mọi học viên sau backfill (xem dưới) |
-| `cohort_id` | uuid FK → `cohorts`, nullable | phải thuộc `program_id` (check qua trigger, vì FK đơn thuần không ràng buộc chéo bảng); NOT NULL cho học viên sau backfill |
-| `academic_status` | enum `STUDYING` \| `SUSPENDED` \| `GRADUATED` \| `WITHDRAWN` | **NOT NULL** cho mọi học viên (role=STUDENT); không áp dụng cho staff |
+| `student_code` | text, nullable, unique (partial index `WHERE student_code IS NOT NULL`) | staff nhập tay; không tự sinh; chỉ học viên (`role='STUDENT'`) mới có giá trị |
+| `program_id` | uuid FK → `programs`, nullable | **nullable ngay cả cho học viên** — staff gán sau khi tạo hồ sơ (quyết định nghiệp vụ #1/#8), khác với dự thảo NOT NULL ban đầu bên dưới |
+| `cohort_id` | uuid FK → `cohorts`, nullable | phải thuộc `program_id` (check qua trigger `profiles_academic_guard`, vì FK đơn thuần không ràng buộc chéo bảng); nullable, không thể set nếu `program_id` là null |
+| `academic_status` | enum `STUDYING` \| `SUSPENDED` \| `GRADUATED` \| `WITHDRAWN` | **NOT NULL** cho mọi học viên (role=STUDENT); không áp dụng cho staff — giữ đúng như dự thảo |
 
-Không tạo bảng "student_profile" riêng — hồ sơ học viên theo yêu cầu chốt #2 (mã, họ tên, email, chương trình, khóa, trạng thái) đã có sẵn `id`/`full_name`/(email qua `auth.users`)/role trong `profiles`; chỉ cần bổ sung 3 cột trên là đủ, tránh trùng lặp bảng.
+`student_code` không có trong dự thảo gốc bên dưới (chỉ liệt kê `program_id`/`cohort_id`/`academic_status`); được thêm vì yêu cầu nghiệp vụ Batch 2 chốt rằng nhân viên đào tạo nhập mã học viên thủ công và mã phải unique. `program_id`/`cohort_id` được đổi thành nullable-cho-cả-học-viên (khác dự thảo "NOT NULL sau backfill" bên dưới) vì hồ sơ học viên có thể tồn tại trước khi được gán chương trình/khóa — gán là một hành động staff làm sau, không phải tại thời điểm tạo hồ sơ.
+
+Không tạo bảng "student_profile" riêng — hồ sơ học viên theo yêu cầu chốt #2 (mã, họ tên, email, chương trình, khóa, trạng thái) đã có sẵn `id`/`full_name`/(email qua `auth.users`)/role trong `profiles`; chỉ cần bổ sung 4 cột trên là đủ, tránh trùng lặp bảng.
+
+Dự thảo gốc (trước khi triển khai thực tế Batch 2, giữ lại để lịch sử):
 
 **Backfill & ràng buộc NOT NULL (DECIDED):** migration bổ sung cột `academic_status` phải backfill toàn bộ học viên hiện có theo `student_status` cũ **trước khi** đặt ràng buộc `NOT NULL`:
 - `student_status = 'ACTIVE'` → `academic_status = 'STUDYING'`
@@ -353,7 +360,8 @@ Không có endpoint DELETE cho cả 3 tài nguyên (không hard delete, theo quy
 - **"Chương trình đào tạo"** (`/staff/programs`, `StaffPrograms.tsx`) — **ĐÃ TRIỂN KHAI (Batch 1)**: danh sách chương trình + tạo mới với đủ 4 cấu hình (tín chỉ bắt buộc/tự chọn tối thiểu, điểm đạt tối thiểu, tín chỉ tối thiểu luận văn); không có delete.
 - **Chi tiết chương trình** (`/staff/programs/:id`, `StaffProgramDetail.tsx`) — **ĐÃ TRIỂN KHAI (Batch 1)**: sửa cấu hình chương trình; danh sách + tạo khóa thuộc chương trình; danh sách + gán môn học (chọn REQUIRED/ELECTIVE) + đổi phân loại; không có delete cho khóa hay môn đã gán.
 - **"Khóa học"** — không có trang danh sách khóa độc lập trong Batch 1; quản lý khóa nằm trong trang chi tiết chương trình (một khóa luôn thuộc đúng một chương trình, BUS-17).
-- **"Học viên"** — chưa triển khai (Batch 2).
+- **"Học viên"** (`/staff/students`, `StaffStudents.tsx`) — **ĐÃ TRIỂN KHAI (Batch 2, local-only)**: danh sách học viên (mã, họ tên, email, chương trình, trạng thái) với lọc theo chương trình/khóa/trạng thái/tìm kiếm.
+- **Chi tiết học viên** (`/staff/students/:id`, `StaffStudentDetail.tsx`) — **ĐÃ TRIỂN KHAI (Batch 2, local-only)**: sửa mã học viên, họ tên, gán chương trình/khóa, đổi trạng thái học tập.
 - **"Giảng viên hướng dẫn"** — chưa triển khai (Batch 5).
 - **"Luận văn"** — chưa triển khai (Batch 5).
 
@@ -411,7 +419,7 @@ Không có endpoint DELETE cho cả 3 tài nguyên (không hard delete, theo quy
 ## K. Phased implementation plan (batch nhỏ, review/test độc lập)
 
 1. **Batch 1 — Danh mục nền tảng — ĐÃ TRIỂN KHAI (local-only, chưa áp Supabase Cloud):** migrations 0015–0017 (`programs`, `cohorts`, `program_courses` + RLS cùng batch) + staff CRUD API (`apps/api/src/routes/academic.ts`) + UI (`StaffPrograms.tsx`, `StaffProgramDetail.tsx`) cho chương trình/khóa/gán môn. Không đụng gì của MVP. Test: schema-level cho BUS-17/18/19 (`academic.test.ts`); DB-level (unique constraint, RLS deny) chưa verify được, xem báo cáo cuối.
-2. **Batch 2 — Hồ sơ học viên mở rộng:** migration 0018 (`profiles` + 3 cột) + staff UI gán chương trình/khóa + đổi trạng thái học tập + student "Chương trình của tôi". Test: BUS-19/25/26, RLS cho cột mới.
+2. **Batch 2 — Hồ sơ học viên mở rộng — ĐÃ TRIỂN KHAI (local-only, chưa áp Supabase Cloud):** migration 0018 (`profiles` + `student_code`/`program_id`/`cohort_id`/`academic_status`, backfill, trigger `profiles_academic_guard` gộp 3 việc: kiểm tra cohort thuộc đúng program, khóa gán lại khi đã có enrollment, sync một chiều `academic_status`→`student_status`) + migration 0019 (RPC `staff_list_students`/`staff_get_student`/`staff_update_student`/`student_get_own_profile`, đọc email an toàn từ `auth.users`) + staff UI `StaffStudents.tsx`/`StaffStudentDetail.tsx` (gán chương trình/khóa, đổi trạng thái học tập) + student UI `StudentProfile.tsx` ("Hồ sơ học tập", read-only). **Mở rộng phạm vi so với thiết kế gốc:** thêm cột `student_code` (mã học viên do staff nhập tay, unique) — thiết kế gốc ở mục C.4 chỉ dự kiến 3 cột (`program_id`/`cohort_id`/`academic_status`); `student_code` được thêm theo yêu cầu nghiệp vụ của Batch 2 và tài liệu này đã được cập nhật để phản ánh đúng. Test: schema-level cho `students.test.ts` (academic_status enum, validation); logic DB (sync một chiều, cohort-program mismatch, khóa gán lại) chỉ được xác minh qua đọc lại SQL, chưa chạy được do không có local Supabase — xem báo cáo Batch 2.
 3. **Batch 3 — Điểm & tiến độ tín chỉ:** migrations 0020, 0021, 0023, 0024 + staff nhập điểm UI + student "Kết quả học tập". Test: BUS-20/21/22 đầy đủ, không đụng RPC MVP.
 4. **Batch 4 — Ràng buộc BUS-16 vào RPC đăng ký:** migration 0022 riêng biệt, kèm full regression suite J.4 trước khi merge. Phụ thuộc Batch 2 (backfill `academic_status` ở 0018 phải đã chạy và xác nhận không còn NULL) — vẫn là batch rủi ro cao nhất do sửa RPC lõi MVP, nhưng không còn phụ thuộc quyết định nghiệp vụ mở, chỉ còn phụ thuộc trình tự migration.
 5. **Batch 5 — Luận văn:** migrations 0025, 0026, 0027, 0028, 0029 (thesis + advisors + RLS + RPC) + staff "Giảng viên hướng dẫn" + "Luận văn" + student "Luận văn của tôi". Phụ thuộc Batch 3 (cần tiến độ tín chỉ để tính BUS-23).
@@ -446,5 +454,9 @@ Không còn assumption nào chặn việc tiếp tục Batch 2 trở đi tại t
 
 Batch 1 (danh mục `programs`/`cohorts`/`program_courses` + RLS cùng batch + API + UI + seed + test schema) đã triển khai đầy đủ ở phạm vi local: migrations 0015–0017, `apps/api/src/routes/academic.ts` + `apps/api/src/schemas/academic.ts`, trang `StaffPrograms.tsx`/`StaffProgramDetail.tsx`, mục nav "Chương trình đào tạo", `supabase/seed.sql` cập nhật, test `academic.test.ts` (11/11 pass). Toàn bộ 6 quyết định chốt ở lượt trước loại bỏ mọi blocker nghiệp vụ đã nêu, bao gồm cả blocker từng chặn Batch 4. Chưa có Supabase Cloud/local nào được áp dụng — xem báo cáo cuối cho danh sách cloud action cần xác nhận riêng trước khi Batch 1 có thể chạy được trên môi trường thật.
 
+**BATCH 2 IMPLEMENTED (local-only) — READY FOR BATCH 3**
+
+Batch 2 (hồ sơ học viên mở rộng: `student_code`/`program_id`/`cohort_id`/`academic_status` + RPC đọc email an toàn + staff/student UI) đã triển khai đầy đủ ở phạm vi local: migrations 0018–0019, `apps/api/src/routes/students.ts` + `apps/api/src/schemas/students.ts`, trang `StaffStudents.tsx`/`StaffStudentDetail.tsx`/`StudentProfile.tsx`, mục nav "Học viên" (staff)/"Hồ sơ học tập" (student), test `students.test.ts` (schema-level). Chưa có Supabase Cloud/local nào được áp dụng — xem `docs/BATCH_2_IMPLEMENTATION_REPORT.md` cho danh sách cloud action cần xác nhận riêng và phần chưa test được do không có local Supabase.
+
 ### Đề xuất batch code tiếp theo
-**Batch 2 — Hồ sơ học viên mở rộng** (migration 0018 `profiles_academic_extension` với backfill `academic_status`): phụ thuộc Batch 1 đã có `programs`/`cohorts` để `profiles.program_id`/`cohort_id` tham chiếu tới.
+**Batch 3 — Điểm & tiến độ tín chỉ** (migrations 0020, 0021, 0023, 0024): phụ thuộc Batch 2 đã có `academic_status`/`program_id` để tính điều kiện đạt/tiến độ tín chỉ theo đúng chương trình của từng học viên.

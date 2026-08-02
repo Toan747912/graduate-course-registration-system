@@ -76,10 +76,22 @@ npm install
 npm run seed:demo-users
 ```
 
-This creates (or, if already present, re-syncs the role/status of) one
-`TRAINING_STAFF` account and two `ACTIVE` `STUDENT` accounts via the Supabase
-Admin API, using the Secret key from your local `.env`. This is the only
-place in the codebase that reads `SUPABASE_SECRET_KEY`. It is safe to re-run.
+This creates (or, if already present, re-syncs the role/student_status/
+academic_status of) one `TRAINING_STAFF` account and two `STUDENT` accounts
+via the Supabase Admin API, using the Secret key from your local `.env`. This
+is the only place in the codebase that reads `SUPABASE_SECRET_KEY`. It is
+safe to re-run.
+
+**Password behavior:** a password is only ever set when the Auth user is
+*created* for the first time. Re-running the script against an
+already-existing demo account re-syncs its profile (role, `student_status`,
+`academic_status`) but never touches its password. If you need to force a
+password reset for an existing demo account (e.g. you forgot it locally),
+run with the explicit opt-in flag — this never happens implicitly:
+
+```bash
+SEED_RESET_DEMO_PASSWORDS=true npm run seed:demo-users
+```
 
 ## 7. Run the apps
 

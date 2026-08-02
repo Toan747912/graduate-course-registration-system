@@ -33,6 +33,35 @@ body {
   padding: 1.25rem;
 }
 
+.detail-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+}
+
+.detail-list > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.detail-list dt {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.detail-list dd {
+  margin: 0;
+  font-size: 1rem;
+}
+
+@media (min-width: 640px) {
+  .detail-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .form {
   width: 100%;
   max-width: 360px;

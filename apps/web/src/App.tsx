@@ -4,12 +4,15 @@ import { RequireRole } from './routes/RequireRole';
 import { Login } from './pages/Login';
 import { StudentClasses } from './pages/student/StudentClasses';
 import { StudentHistory } from './pages/student/StudentHistory';
+import { StudentProfile } from './pages/student/StudentProfile';
 import { StaffRegistrationPeriods } from './pages/staff/StaffRegistrationPeriods';
 import { StaffCourseClasses } from './pages/staff/StaffCourseClasses';
 import { StaffCourseClassDetail } from './pages/staff/StaffCourseClassDetail';
 import { StaffHome } from './pages/staff/StaffHome';
 import { StaffPrograms } from './pages/staff/StaffPrograms';
 import { StaffProgramDetail } from './pages/staff/StaffProgramDetail';
+import { StaffStudents } from './pages/staff/StaffStudents';
+import { StaffStudentDetail } from './pages/staff/StaffStudentDetail';
 
 export function App(): JSX.Element {
   return (
@@ -34,6 +37,14 @@ export function App(): JSX.Element {
           }
         />
         <Route
+          path="/student/profile"
+          element={
+            <RequireRole allow={['STUDENT']}>
+              <StudentProfile />
+            </RequireRole>
+          }
+        />
+        <Route
           path="/staff"
           element={
             <RequireRole allow={['TRAINING_STAFF']}>
@@ -54,6 +65,22 @@ export function App(): JSX.Element {
           element={
             <RequireRole allow={['TRAINING_STAFF']}>
               <StaffProgramDetail />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/staff/students"
+          element={
+            <RequireRole allow={['TRAINING_STAFF']}>
+              <StaffStudents />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/staff/students/:id"
+          element={
+            <RequireRole allow={['TRAINING_STAFF']}>
+              <StaffStudentDetail />
             </RequireRole>
           }
         />

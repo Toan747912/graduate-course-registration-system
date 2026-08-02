@@ -170,6 +170,31 @@ export interface ProgramCourse {
   };
 }
 
+export type AcademicStatus = 'STUDYING' | 'SUSPENDED' | 'GRADUATED' | 'WITHDRAWN';
+
+export interface StudentProfile {
+  id: string;
+  student_code: string | null;
+  full_name: string;
+  email: string;
+  program_id: string | null;
+  cohort_id: string | null;
+  academic_status: AcademicStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UpdateStudentResult {
+  success: boolean;
+  id?: string;
+  student_code?: string | null;
+  full_name?: string;
+  program_id?: string | null;
+  cohort_id?: string | null;
+  academic_status?: AcademicStatus;
+  reason?: string;
+}
+
 export interface ApiErrorBody {
   ok: false;
   error: {
