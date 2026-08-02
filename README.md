@@ -59,6 +59,23 @@ overall):** complete business forms and UI, styling, prerequisite courses,
 tuition, grades, thesis, exam schedules, notifications, fine-grained admin
 permissions.
 
+## Academic management expansion (Batch 1 — local only, not applied to cloud)
+
+Design: [`docs/ACADEMIC_MANAGEMENT_EXPANSION_DESIGN.md`](docs/ACADEMIC_MANAGEMENT_EXPANSION_DESIGN.md).
+Batch 1 adds the training-program catalog on top of Phase 1, staff-only:
+- Migrations `0015`–`0017`: `programs`, `cohorts`, `program_courses` (many-to-many
+  with `courses`, REQUIRED/ELECTIVE), RLS shipped in the same batch (no student
+  read access to this catalog yet — see the design doc for why).
+- `apps/api/src/routes/academic.ts` + `apps/api/src/schemas/academic.ts`: staff
+  CRUD (no delete — MVP never hard-deletes these rows).
+- `apps/web/src/pages/staff/{StaffPrograms,StaffProgramDetail}.tsx` + a
+  "Chương trình đào tạo" nav entry.
+- `supabase/seed.sql` has one sample program/cohort/course-assignment, idempotent.
+
+These migrations and the seed update have **not** been applied to any Supabase
+project (cloud or otherwise) as part of this change — see the design doc's
+migration plan before running them anywhere real data lives.
+
 ## Running locally
 
 Requires Node.js 20+, npm, and a Supabase Cloud project (see

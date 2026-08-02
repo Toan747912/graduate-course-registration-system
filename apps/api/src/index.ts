@@ -5,6 +5,7 @@ import { healthRouter } from './routes/health.js';
 import { authRouter } from './routes/auth.js';
 import { studentRouter } from './routes/student.js';
 import { staffRouter } from './routes/staff.js';
+import { academicRouter } from './routes/academic.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -16,6 +17,7 @@ app.use('/api', healthRouter);
 app.use('/api', authRouter);
 app.use('/api', studentRouter);
 app.use('/api', staffRouter);
+app.use('/api', academicRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

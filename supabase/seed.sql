@@ -48,3 +48,40 @@ values
   ('44444444-4444-4444-4444-444444444443', 5, 3, 'C305'),
   ('44444444-4444-4444-4444-444444444444', 6, 2, 'A101')
 on conflict (course_class_id, day_of_week, session_slot) do nothing;
+
+-- Batch 1 of the academic-management expansion
+-- (docs/ACADEMIC_MANAGEMENT_EXPANSION_DESIGN.md): programs, cohorts, and the
+-- program/course requirement mapping. Not applied to any cloud environment as
+-- part of this change; local-only reference data for future local testing.
+insert into public.programs (
+  id, code, name, required_credits_min, elective_credits_min, pass_score_min, thesis_credits_min
+)
+values (
+  '55555555-5555-5555-5555-555555555551',
+  'CS-MASTER',
+  'Thạc sĩ Khoa học Máy tính',
+  20,
+  6,
+  5.0,
+  12
+)
+on conflict (code) do nothing;
+
+insert into public.cohorts (id, program_id, code, name)
+values (
+  '66666666-6666-6666-6666-666666666661',
+  '55555555-5555-5555-5555-555555555551',
+  'K2026',
+  'Khóa 2026'
+)
+on conflict (program_id, code) do nothing;
+
+-- CS601/CS602/CS603 required, MG601 elective - matches the existing demo
+-- course catalog above so the assignment is meaningful without new courses.
+insert into public.program_courses (program_id, course_id, requirement_type)
+values
+  ('55555555-5555-5555-5555-555555555551', '33333333-3333-3333-3333-333333333331', 'REQUIRED'),
+  ('55555555-5555-5555-5555-555555555551', '33333333-3333-3333-3333-333333333332', 'REQUIRED'),
+  ('55555555-5555-5555-5555-555555555551', '33333333-3333-3333-3333-333333333333', 'REQUIRED'),
+  ('55555555-5555-5555-5555-555555555551', '33333333-3333-3333-3333-333333333334', 'ELECTIVE')
+on conflict (program_id, course_id) do nothing;

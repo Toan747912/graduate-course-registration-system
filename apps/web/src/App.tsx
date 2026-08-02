@@ -8,6 +8,8 @@ import { StaffRegistrationPeriods } from './pages/staff/StaffRegistrationPeriods
 import { StaffCourseClasses } from './pages/staff/StaffCourseClasses';
 import { StaffCourseClassDetail } from './pages/staff/StaffCourseClassDetail';
 import { StaffHome } from './pages/staff/StaffHome';
+import { StaffPrograms } from './pages/staff/StaffPrograms';
+import { StaffProgramDetail } from './pages/staff/StaffProgramDetail';
 
 export function App(): JSX.Element {
   return (
@@ -36,6 +38,22 @@ export function App(): JSX.Element {
           element={
             <RequireRole allow={['TRAINING_STAFF']}>
               <StaffHome />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/staff/programs"
+          element={
+            <RequireRole allow={['TRAINING_STAFF']}>
+              <StaffPrograms />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/staff/programs/:id"
+          element={
+            <RequireRole allow={['TRAINING_STAFF']}>
+              <StaffProgramDetail />
             </RequireRole>
           }
         />

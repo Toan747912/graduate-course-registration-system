@@ -19,6 +19,9 @@ export function StaffNav(): JSX.Element {
 
   return (
     <nav className="nav">
+      <NavLink to="/staff/programs" className={linkClassName}>
+        Chương trình đào tạo
+      </NavLink>
       <NavLink to="/staff/registration-periods" className={linkClassName}>
         Đợt đăng ký
       </NavLink>

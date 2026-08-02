@@ -133,6 +133,43 @@ export interface CancelCourseClassResult {
   reason?: string;
 }
 
+export interface Program {
+  id: string;
+  code: string;
+  name: string;
+  required_credits_min: number;
+  elective_credits_min: number;
+  pass_score_min: number;
+  thesis_credits_min: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Cohort {
+  id: string;
+  program_id: string;
+  code: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type RequirementType = 'REQUIRED' | 'ELECTIVE';
+
+export interface ProgramCourse {
+  id: string;
+  program_id: string;
+  course_id: string;
+  requirement_type: RequirementType;
+  created_at: string;
+  updated_at: string;
+  courses: {
+    code: string;
+    name: string;
+    credits: number;
+  };
+}
+
 export interface ApiErrorBody {
   ok: false;
   error: {

@@ -12,6 +12,7 @@
     "start": "node dist/index.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint \"src/**/*.ts\"",
+    "test": "tsx --test src/**/*.test.ts",
     "seed:demo-users": "tsx src/scripts/seedDemoUsers.ts"
   },
   "dependencies": {
