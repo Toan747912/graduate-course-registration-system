@@ -195,6 +195,57 @@ export interface UpdateStudentResult {
   reason?: string;
 }
 
+// Batch 3: grades and progress (docs/BATCH_3_GRADES_AND_PROGRESS_DESIGN.md).
+
+export type GradeStatus = 'DRAFT' | 'PUBLISHED';
+export type ResultStatus = 'PASS' | 'FAIL';
+
+export interface ClassGradeRow {
+  enrollment_id: string;
+  student_id: string;
+  student_code: string | null;
+  full_name: string;
+  grade_id: string | null;
+  final_score: number | null;
+  grade_status: GradeStatus | null;
+  result_status: ResultStatus | null;
+  published_at: string | null;
+}
+
+export interface GradeMutationResult {
+  success: boolean;
+  id?: string;
+  enrollment_id?: string;
+  final_score?: number;
+  grade_status?: GradeStatus;
+  result_status?: ResultStatus;
+  published_at?: string;
+  reason?: string;
+}
+
+export interface StudentGradeRow {
+  enrollment_id: string;
+  course_code: string;
+  course_name: string;
+  credits: number;
+  class_code: string;
+  semester_name: string;
+  final_score: number;
+  grade_status?: GradeStatus;
+  result_status: ResultStatus;
+  published_at: string;
+  in_program: boolean;
+  counts_towards_progress: boolean;
+}
+
+export interface StudentProgress {
+  program_id: string | null;
+  required_credits_min: number | null;
+  elective_credits_min: number | null;
+  required_credits_earned: number;
+  elective_credits_earned: number;
+}
+
 export interface ApiErrorBody {
   ok: false;
   error: {

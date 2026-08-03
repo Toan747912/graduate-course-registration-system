@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { StaffNav } from '../../components/StaffNav';
 import { apiFetch, ApiRequestError } from '../../lib/api';
-import type { CancelCourseClassResult, ClassEnrollmentRow, CourseClassStaff } from '../../types/api';
+import type { CancelCourseClassResult, ClassEnrollmentRow, ClassGradeRow, CourseClassStaff } from '../../types/api';
 
 type LoadState = 'loading' | 'ready' | 'error';
 
@@ -37,6 +37,7 @@ export function StaffCourseClassDetail(): JSX.Element {
 
   const [courseClass, setCourseClass] = useState<CourseClassStaff | null>(null);
   const [enrollments, setEnrollments] = useState<ClassEnrollmentRow[]>([]);
+  const [gradeRows, setGradeRows] = useState<ClassGradeRow[]>([]);
   const [state, setState] = useState<LoadState>('loading');
   const [error, setError] = useState<string | null>(null);
 
@@ -53,12 +54,14 @@ export function StaffCourseClassDetail(): JSX.Element {
     setState('loading');
     setError(null);
     try {
-      const [classData, enrollmentData] = await Promise.all([
+      const [classData, enrollmentData, gradeData] = await Promise.all([
         apiFetch<CourseClassStaff>(`/staff/course-classes/${id}`),
         apiFetch<ClassEnrollmentRow[]>(`/staff/course-classes/${id}/enrollments`),
+        apiFetch<ClassGradeRow[]>(`/staff/course-classes/${id}/grades`),
       ]);
       setCourseClass(classData);
       setEnrollments(enrollmentData);
+      setGradeRows(gradeData);
       setState('ready');
     } catch (err) {
       setState('error');
@@ -71,6 +74,7 @@ export function StaffCourseClassDetail(): JSX.Element {
   }, [load]);
 
   const confirmedEnrollments = enrollments.filter((e) => e.status === 'CONFIRMED');
+  const hasAnyGrade = gradeRows.some((g) => g.grade_id !== null);
 
   const handleCancelClass = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
@@ -159,13 +163,21 @@ export function StaffCourseClassDetail(): JSX.Element {
               ))}
             </ul>
 
+            <div className="history-card-actions">
+              <Link to={`/staff/course-classes/${id}/grades`}>
+                <button type="button">Nhập điểm lớp học phần</button>
+              </Link>
+            </div>
+
             {courseClass.status === 'ACTIVE' ? (
               <div className="history-card-actions">
                 {!showCancelForm ? (
-                  <button type="button" onClick={() => setShowCancelForm(true)}>
+                  <button type="button" onClick={() => setShowCancelForm(true)} disabled={hasAnyGrade} title={hasAnyGrade ? 'Lớp đã có điểm, không thể hủy' : undefined}>
                     Hủy lớp học phần
                   </button>
-                ) : (
+                ) : null}
+                {hasAnyGrade && !showCancelForm ? <p className="note-text">Lớp đã có điểm, không thể hủy.</p> : null}
+                {!hasAnyGrade && showCancelForm ? (
                   <form className="form" onSubmit={handleCancelClass}>
                     <p className="error-text">
                       Hủy lớp sẽ chuyển toàn bộ đăng ký đã xác nhận ({confirmedEnrollments.length}) sang trạng thái
@@ -189,7 +201,7 @@ export function StaffCourseClassDetail(): JSX.Element {
                       </button>
                     </div>
                   </form>
-                )}
+                ) : null}
                 {cancelError ? <p className="error-text">{cancelError}</p> : null}
               </div>
             ) : null}

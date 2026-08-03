@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { StudentNav } from '../../components/StudentNav';
 import { apiFetch, ApiRequestError } from '../../lib/api';
-import type { EnrollmentActionResult, EnrollmentWithHistory } from '../../types/api';
+import type { EnrollmentActionResult, EnrollmentWithHistory, StudentGradeRow } from '../../types/api';
 
 type LoadState = 'loading' | 'ready' | 'empty' | 'error';
 
@@ -28,6 +28,7 @@ function formatDateTime(iso: string): string {
 
 export function StudentHistory(): JSX.Element {
   const [enrollments, setEnrollments] = useState<EnrollmentWithHistory[]>([]);
+  const [gradedEnrollmentIds, setGradedEnrollmentIds] = useState<Set<string>>(new Set());
   const [state, setState] = useState<LoadState>('loading');
   const [error, setError] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
@@ -46,8 +47,18 @@ export function StudentHistory(): JSX.Element {
     setState('loading');
     setError(null);
     try {
-      const data = await apiFetch<EnrollmentWithHistory[]>('/student/enrollments/history');
+      const [data, gradeData] = await Promise.all([
+        apiFetch<EnrollmentWithHistory[]>('/student/enrollments/history'),
+        // Only PUBLISHED grades are ever exposed to a student (design decision
+        // #2 in docs/BATCH_3_GRADES_AND_PROGRESS_DESIGN.md) - this can only
+        // disable "Hủy" for enrollments that already have a PUBLISHED grade,
+        // never for DRAFT-only ones. A DRAFT-graded enrollment's cancel
+        // attempt is still blocked server-side (BUS-37, RPC cancel_own_enrollment,
+        // migration 0027); the button just won't be pre-disabled for it.
+        apiFetch<StudentGradeRow[]>('/student/grades'),
+      ]);
       setEnrollments(data);
+      setGradedEnrollmentIds(new Set(gradeData.map((g) => g.enrollment_id)));
       setState(data.length === 0 ? 'empty' : 'ready');
     } catch (err) {
       setState('error');
@@ -117,7 +128,8 @@ export function StudentHistory(): JSX.Element {
         <ul className="history-list">
           {enrollments.map((enrollment) => {
             const message = cancelMessages[enrollment.id];
-            const canCancel = enrollment.status === 'CONFIRMED';
+            const hasKnownGrade = gradedEnrollmentIds.has(enrollment.id);
+            const canCancel = enrollment.status === 'CONFIRMED' && !hasKnownGrade;
             const isPending = pendingId === enrollment.id;
             return (
               <li key={enrollment.id} className="card history-card">
@@ -141,11 +153,17 @@ export function StudentHistory(): JSX.Element {
                   ))}
                 </ol>
 
-                {canCancel ? (
+                {enrollment.status === 'CONFIRMED' ? (
                   <div className="history-card-actions">
-                    <button type="button" disabled={isPending} onClick={() => setCancelTarget(enrollment)}>
+                    <button
+                      type="button"
+                      disabled={isPending || !canCancel}
+                      title={hasKnownGrade ? 'Lượt đăng ký đã có điểm, không thể hủy' : undefined}
+                      onClick={() => setCancelTarget(enrollment)}
+                    >
                       {isPending ? 'Đang gửi…' : 'Hủy'}
                     </button>
+                    {hasKnownGrade ? <p className="note-text">Lượt đăng ký đã có điểm, không thể hủy.</p> : null}
                   </div>
                 ) : null}
 

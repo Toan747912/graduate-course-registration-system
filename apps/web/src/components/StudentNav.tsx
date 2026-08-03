@@ -28,6 +28,9 @@ export function StudentNav(): JSX.Element {
       <NavLink to="/student/profile" className={linkClassName}>
         Hồ sơ học tập
       </NavLink>
+      <NavLink to="/student/grades" className={linkClassName}>
+        Kết quả học tập
+      </NavLink>
       <button type="button" className="nav-link nav-logout" onClick={handleLogout}>
         Đăng xuất
       </button>

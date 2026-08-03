@@ -2,7 +2,15 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { StaffNav } from '../../components/StaffNav';
 import { apiFetch, ApiRequestError } from '../../lib/api';
-import type { AcademicStatus, Cohort, Program, StudentProfile, UpdateStudentResult } from '../../types/api';
+import type {
+  AcademicStatus,
+  Cohort,
+  Program,
+  StudentGradeRow,
+  StudentProfile,
+  StudentProgress,
+  UpdateStudentResult,
+} from '../../types/api';
 
 type LoadState = 'loading' | 'ready' | 'error';
 
@@ -45,18 +53,25 @@ export function StaffStudentDetail(): JSX.Element {
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
+  const [grades, setGrades] = useState<StudentGradeRow[]>([]);
+  const [progress, setProgress] = useState<StudentProgress | null>(null);
+
   const load = useCallback(async () => {
     if (!id) return;
     setState('loading');
     setError(null);
     try {
-      const [studentData, programData] = await Promise.all([
+      const [studentData, programData, gradeData, progressData] = await Promise.all([
         apiFetch<StudentProfile>(`/staff/students/${id}`),
         apiFetch<Program[]>('/staff/programs'),
+        apiFetch<StudentGradeRow[]>(`/staff/students/${id}/grades`),
+        apiFetch<StudentProgress | null>(`/staff/students/${id}/progress`),
       ]);
       setStudent(studentData);
       setForm(toForm(studentData));
       setPrograms(programData);
+      setGrades(gradeData);
+      setProgress(progressData);
       if (studentData.program_id) {
         const cohortData = await apiFetch<Cohort[]>(`/staff/cohorts?programId=${studentData.program_id}`);
         setCohorts(cohortData);
@@ -218,6 +233,70 @@ export function StaffStudentDetail(): JSX.Element {
             {formError ? <p className="error-text">{formError}</p> : null}
             {formSuccess ? <p className="result-text result-ok">{formSuccess}</p> : null}
           </form>
+        </div>
+      ) : null}
+
+      {state === 'ready' ? (
+        <div className="card">
+          <h2>Tiến độ tín chỉ</h2>
+          {!progress || !progress.program_id ? (
+            <p>Học viên chưa được gán chương trình đào tạo, chưa thể tính tiến độ tín chỉ.</p>
+          ) : (
+            <p>
+              Bắt buộc: {progress.required_credits_earned}/{progress.required_credits_min} · Tự chọn:{' '}
+              {progress.elective_credits_earned}/{progress.elective_credits_min}
+            </p>
+          )}
+        </div>
+      ) : null}
+
+      {state === 'ready' ? (
+        <div className="card">
+          <h2>Kết quả học tập</h2>
+          {grades.length === 0 ? (
+            <p>Chưa có kết quả học tập.</p>
+          ) : (
+            <div className="table-scroll">
+              <table className="classes-table">
+                <thead>
+                  <tr>
+                    <th>Môn học</th>
+                    <th>Lớp/Học kỳ</th>
+                    <th>Điểm</th>
+                    <th>Trạng thái</th>
+                    <th>Kết quả</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {grades.map((row) => (
+                    <tr key={row.enrollment_id}>
+                      <td data-label="Môn học">
+                        {row.course_code} — {row.course_name}
+                      </td>
+                      <td data-label="Lớp/Học kỳ" className="cell-nowrap">
+                        {row.class_code} · {row.semester_name}
+                      </td>
+                      <td data-label="Điểm">{row.final_score}</td>
+                      <td data-label="Trạng thái" className="cell-nowrap">
+                        <span className={row.grade_status === 'PUBLISHED' ? 'badge badge-published' : 'badge badge-draft'}>
+                          {row.grade_status === 'PUBLISHED' ? 'Đã công bố' : 'Nháp'}
+                        </span>
+                      </td>
+                      <td data-label="Kết quả" className="cell-nowrap">
+                        {row.result_status ? (
+                          <span className={row.result_status === 'PASS' ? 'badge badge-pass' : 'badge badge-fail'}>
+                            {row.result_status === 'PASS' ? 'Đạt' : 'Không đạt'}
+                          </span>
+                        ) : (
+                          '—'
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       ) : null}
     </main>

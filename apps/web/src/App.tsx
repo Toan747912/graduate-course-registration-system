@@ -5,9 +5,11 @@ import { Login } from './pages/Login';
 import { StudentClasses } from './pages/student/StudentClasses';
 import { StudentHistory } from './pages/student/StudentHistory';
 import { StudentProfile } from './pages/student/StudentProfile';
+import { StudentGrades } from './pages/student/StudentGrades';
 import { StaffRegistrationPeriods } from './pages/staff/StaffRegistrationPeriods';
 import { StaffCourseClasses } from './pages/staff/StaffCourseClasses';
 import { StaffCourseClassDetail } from './pages/staff/StaffCourseClassDetail';
+import { StaffCourseClassGrades } from './pages/staff/StaffCourseClassGrades';
 import { StaffHome } from './pages/staff/StaffHome';
 import { StaffPrograms } from './pages/staff/StaffPrograms';
 import { StaffProgramDetail } from './pages/staff/StaffProgramDetail';
@@ -41,6 +43,14 @@ export function App(): JSX.Element {
           element={
             <RequireRole allow={['STUDENT']}>
               <StudentProfile />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/student/grades"
+          element={
+            <RequireRole allow={['STUDENT']}>
+              <StudentGrades />
             </RequireRole>
           }
         />
@@ -105,6 +115,14 @@ export function App(): JSX.Element {
           element={
             <RequireRole allow={['TRAINING_STAFF']}>
               <StaffCourseClassDetail />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/staff/course-classes/:id/grades"
+          element={
+            <RequireRole allow={['TRAINING_STAFF']}>
+              <StaffCourseClassGrades />
             </RequireRole>
           }
         />
