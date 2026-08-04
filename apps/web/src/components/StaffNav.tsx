@@ -31,6 +31,15 @@ export function StaffNav(): JSX.Element {
       <NavLink to="/staff/course-classes" className={linkClassName}>
         Lớp học phần
       </NavLink>
+      <NavLink to="/staff/research-areas" className={linkClassName}>
+        Lĩnh vực nghiên cứu
+      </NavLink>
+      <NavLink to="/staff/advisors" className={linkClassName}>
+        Giảng viên hướng dẫn
+      </NavLink>
+      <NavLink to="/staff/theses" className={linkClassName}>
+        Luận văn
+      </NavLink>
       <button type="button" className="nav-link nav-logout" onClick={handleLogout}>
         Đăng xuất
       </button>

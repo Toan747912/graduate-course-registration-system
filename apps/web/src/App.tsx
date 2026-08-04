@@ -15,6 +15,11 @@ import { StaffPrograms } from './pages/staff/StaffPrograms';
 import { StaffProgramDetail } from './pages/staff/StaffProgramDetail';
 import { StaffStudents } from './pages/staff/StaffStudents';
 import { StaffStudentDetail } from './pages/staff/StaffStudentDetail';
+import { StaffResearchAreas } from './pages/staff/StaffResearchAreas';
+import { StaffAdvisors } from './pages/staff/StaffAdvisors';
+import { StaffTheses } from './pages/staff/StaffTheses';
+import { StaffThesisDetail } from './pages/staff/StaffThesisDetail';
+import { StudentThesis } from './pages/student/StudentThesis';
 
 export function App(): JSX.Element {
   return (
@@ -123,6 +128,46 @@ export function App(): JSX.Element {
           element={
             <RequireRole allow={['TRAINING_STAFF']}>
               <StaffCourseClassGrades />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/staff/research-areas"
+          element={
+            <RequireRole allow={['TRAINING_STAFF']}>
+              <StaffResearchAreas />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/staff/advisors"
+          element={
+            <RequireRole allow={['TRAINING_STAFF']}>
+              <StaffAdvisors />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/staff/theses"
+          element={
+            <RequireRole allow={['TRAINING_STAFF']}>
+              <StaffTheses />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/staff/theses/:id"
+          element={
+            <RequireRole allow={['TRAINING_STAFF']}>
+              <StaffThesisDetail />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/student/thesis"
+          element={
+            <RequireRole allow={['STUDENT']}>
+              <StudentThesis />
             </RequireRole>
           }
         />

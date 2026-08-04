@@ -246,6 +246,75 @@ export interface StudentProgress {
   elective_credits_earned: number;
 }
 
+// Batch 4: thesis proposal / advisor management (docs/BATCH_4_THESIS_ADVISOR_DESIGN.md).
+
+export interface ResearchArea {
+  id: string;
+  name: string;
+  description: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Advisor {
+  id: string;
+  advisor_code: string;
+  full_name: string;
+  specialization: string;
+  max_active_theses: number;
+  is_active: boolean;
+  current_in_progress_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ThesisStatus = 'PENDING_APPROVAL' | 'APPROVED' | 'IN_PROGRESS' | 'COMPLETED' | 'REJECTED' | 'CANCELLED';
+
+export interface Thesis {
+  id: string;
+  thesis_code: string;
+  student_id: string;
+  title: string;
+  description: string;
+  research_area_id: string;
+  status: ThesisStatus;
+  advisor_id: string | null;
+  rejection_reason: string | null;
+  cancellation_reason: string | null;
+  approved_at: string | null;
+  approved_by: string | null;
+  advisor_assigned_at: string | null;
+  completed_at: string | null;
+  cancelled_at: string | null;
+  cancelled_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ThesisAdvisorHistoryEntry {
+  id: string;
+  thesis_id: string;
+  advisor_id: string;
+  assigned_at: string;
+  unassigned_at: string | null;
+  assigned_by: string;
+  change_reason: string | null;
+}
+
+export interface ThesisMutationResult {
+  success: boolean;
+  thesis?: Thesis;
+  reason?: string;
+}
+
+export interface ThesisEligibility {
+  eligible: boolean;
+  reasons: string[];
+  current_credits: number;
+  thesis_credits_min: number | null;
+}
+
 export interface ApiErrorBody {
   ok: false;
   error: {
