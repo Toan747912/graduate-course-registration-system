@@ -20,6 +20,8 @@ import { StaffAdvisors } from './pages/staff/StaffAdvisors';
 import { StaffTheses } from './pages/staff/StaffTheses';
 import { StaffThesisDetail } from './pages/staff/StaffThesisDetail';
 import { StudentThesis } from './pages/student/StudentThesis';
+import { StudentGraduation } from './pages/student/StudentGraduation';
+import { StaffGraduationDashboard } from './pages/staff/StaffGraduationDashboard';
 
 export function App(): JSX.Element {
   return (
@@ -168,6 +170,22 @@ export function App(): JSX.Element {
           element={
             <RequireRole allow={['STUDENT']}>
               <StudentThesis />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/student/graduation"
+          element={
+            <RequireRole allow={['STUDENT']}>
+              <StudentGraduation />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/staff/graduation"
+          element={
+            <RequireRole allow={['TRAINING_STAFF']}>
+              <StaffGraduationDashboard />
             </RequireRole>
           }
         />

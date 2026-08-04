@@ -315,6 +315,100 @@ export interface ThesisEligibility {
   thesis_credits_min: number | null;
 }
 
+// Batch 5: graduation / dashboard (docs/BATCH_5_GRADUATION_DASHBOARD_DESIGN.md).
+
+export type EligibilityStatus = 'ELIGIBLE' | 'NOT_ELIGIBLE' | 'NOT_APPLICABLE';
+
+export interface GraduationEligibility {
+  student_id: string;
+  academic_status: AcademicStatus;
+  eligibility_status: EligibilityStatus;
+  reasons: string[];
+  program_id: string | null;
+  program_code: string | null;
+  program_name: string | null;
+  cohort_id: string | null;
+  cohort_code: string | null;
+  required_credits_min: number | null;
+  elective_credits_min: number | null;
+  required_credits_earned: number | null;
+  elective_credits_earned: number | null;
+  thesis_id: string | null;
+  thesis_code: string | null;
+  thesis_completed_at: string | null;
+  has_active_thesis: boolean | null;
+}
+
+export interface GraduationRecord {
+  id: string;
+  student_id: string;
+  confirmed_by: string;
+  confirmed_at: string;
+  program_id: string;
+  program_code: string;
+  program_name: string;
+  cohort_id: string | null;
+  cohort_code: string | null;
+  required_credits_min: number;
+  elective_credits_min: number;
+  required_credits_earned: number;
+  elective_credits_earned: number;
+  thesis_id: string;
+  thesis_code: string;
+  thesis_completed_at: string;
+  eligibility_rules_version: string;
+  created_at: string;
+}
+
+export interface GraduationStatusResponse {
+  is_graduated: boolean;
+  graduation_record: GraduationRecord | null;
+  eligibility?: GraduationEligibility;
+}
+
+export interface GraduationSummary {
+  total: number;
+  studying: number;
+  eligible: number;
+  not_eligible: number;
+  graduated: number;
+}
+
+export interface GraduationListRow {
+  student_id: string;
+  student_code: string | null;
+  full_name: string;
+  program_id: string | null;
+  program_code: string | null;
+  program_name: string | null;
+  cohort_id: string | null;
+  cohort_code: string | null;
+  academic_status: AcademicStatus;
+  eligibility_status: EligibilityStatus;
+  reasons: string[];
+  required_credits_min: number | null;
+  elective_credits_min: number | null;
+  required_credits_earned: number | null;
+  elective_credits_earned: number | null;
+  thesis_completed_at: string | null;
+  graduation_record_id: string | null;
+  confirmed_at: string | null;
+}
+
+export interface GraduationListResponse {
+  items: GraduationListRow[];
+  page: number;
+  page_size: number;
+  total: number;
+}
+
+export interface ConfirmGraduationResult {
+  success: boolean;
+  reason?: string;
+  details?: string[];
+  graduation_record?: GraduationRecord;
+}
+
 export interface ApiErrorBody {
   ok: false;
   error: {

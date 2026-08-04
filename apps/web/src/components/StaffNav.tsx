@@ -40,6 +40,9 @@ export function StaffNav(): JSX.Element {
       <NavLink to="/staff/theses" className={linkClassName}>
         Luận văn
       </NavLink>
+      <NavLink to="/staff/graduation" className={linkClassName}>
+        Xét tốt nghiệp
+      </NavLink>
       <button type="button" className="nav-link nav-logout" onClick={handleLogout}>
         Đăng xuất
       </button>

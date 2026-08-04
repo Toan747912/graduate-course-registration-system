@@ -37,9 +37,20 @@ test('updateStudentSchema allows null/omitted programId, cohortId, studentCode (
   assert.equal(parsed.cohortId, null);
 });
 
-test('updateStudentSchema accepts every academic_status enum value (STUDYING, SUSPENDED, GRADUATED, WITHDRAWN)', () => {
-  for (const status of ['STUDYING', 'SUSPENDED', 'GRADUATED', 'WITHDRAWN']) {
+test('updateStudentSchema accepts every non-GRADUATED academic_status enum value (STUDYING, SUSPENDED, WITHDRAWN)', () => {
+  for (const status of ['STUDYING', 'SUSPENDED', 'WITHDRAWN']) {
     assert.doesNotThrow(() => updateStudentSchema.parse({ fullName: 'X', academicStatus: status }));
+  }
+});
+
+test('updateStudentSchema rejects GRADUATED (Batch 5 hardening, P1: only staff_confirm_graduation may set it)', () => {
+  assert.throws(() => updateStudentSchema.parse({ fullName: 'X', academicStatus: 'GRADUATED' }));
+  try {
+    updateStudentSchema.parse({ fullName: 'X', academicStatus: 'GRADUATED' });
+    assert.fail('expected updateStudentSchema.parse to throw for GRADUATED');
+  } catch (err) {
+    const zodErr = err as { issues: Array<{ message: string }> };
+    assert.ok(zodErr.issues.some((issue) => issue.message.includes('Xác nhận tốt nghiệp')));
   }
 });
 

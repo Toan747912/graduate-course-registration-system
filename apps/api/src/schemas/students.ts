@@ -2,6 +2,20 @@ import { z } from 'zod';
 
 export const academicStatusEnum = z.enum(['STUDYING', 'SUSPENDED', 'GRADUATED', 'WITHDRAWN']);
 
+// Batch 5 hardening (docs/BATCH_5_PRE_APPLY_SECURITY_REVIEW.md, Finding #1,
+// P1): GRADUATED must never be settable through the generic staff profile
+// update endpoint -- only staff_confirm_graduation (RPC, migration 0045) may
+// move a student into GRADUATED, after recomputing eligibility. This is a
+// narrower enum used ONLY for the update-student input; academicStatusEnum
+// above stays unchanged for read/filter/display use (list filter, etc.)
+// which must still accept/return GRADUATED.
+export const updateAcademicStatusEnum = z.enum(['STUDYING', 'SUSPENDED', 'WITHDRAWN'], {
+  errorMap: () => ({
+    message:
+      'Không thể đặt trạng thái Tốt nghiệp qua chức năng này. Vui lòng sử dụng chức năng Xác nhận tốt nghiệp.',
+  }),
+});
+
 export const listStudentsQuerySchema = z.object({
   programId: z.string().uuid().optional(),
   cohortId: z.string().uuid().optional(),
@@ -19,7 +33,7 @@ export const updateStudentSchema = z
     fullName: z.string().trim().min(1),
     programId: z.string().uuid().optional().nullable(),
     cohortId: z.string().uuid().optional().nullable(),
-    academicStatus: academicStatusEnum,
+    academicStatus: updateAcademicStatusEnum,
   })
   .superRefine((value, ctx) => {
     // Mirrors the DB-level profiles_cohort_requires_program constraint

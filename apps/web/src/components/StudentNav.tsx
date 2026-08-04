@@ -34,6 +34,9 @@ export function StudentNav(): JSX.Element {
       <NavLink to="/student/thesis" className={linkClassName}>
         Luận văn của tôi
       </NavLink>
+      <NavLink to="/student/graduation" className={linkClassName}>
+        Tình trạng tốt nghiệp
+      </NavLink>
       <button type="button" className="nav-link nav-logout" onClick={handleLogout}>
         Đăng xuất
       </button>

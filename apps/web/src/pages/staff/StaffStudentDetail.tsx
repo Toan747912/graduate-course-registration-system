@@ -21,6 +21,13 @@ const ACADEMIC_STATUS_LABELS: Record<AcademicStatus, string> = {
   WITHDRAWN: 'Đã thôi học',
 };
 
+// Batch 5 hardening (docs/BATCH_5_PRE_APPLY_SECURITY_REVIEW.md, Finding #1,
+// P1): GRADUATED must never be selectable/submittable from this generic
+// profile-edit form. Only the Batch 5 graduation dashboard's "Xác nhận tốt
+// nghiệp" action (staff_confirm_graduation RPC) may move a student into
+// GRADUATED, and no form here may revert a GRADUATED student back out of it.
+const EDITABLE_ACADEMIC_STATUSES: AcademicStatus[] = ['STUDYING', 'SUSPENDED', 'WITHDRAWN'];
+
 interface FormState {
   studentCode: string;
   fullName: string;
@@ -108,6 +115,11 @@ export function StaffStudentDetail(): JSX.Element {
     setFormError(null);
     setFormSuccess(null);
     if (!id || !form) return;
+
+    if (student?.academic_status === 'GRADUATED') {
+      setFormError('Học viên đã tốt nghiệp — không thể sửa hồ sơ qua form này.');
+      return;
+    }
 
     if (!form.fullName.trim()) {
       setFormError('Vui lòng nhập họ tên.');
@@ -213,21 +225,37 @@ export function StaffStudentDetail(): JSX.Element {
             </label>
             <label className="field">
               <span>Trạng thái học tập</span>
-              <select
-                value={form.academicStatus}
-                onChange={(e) =>
-                  setForm((prev) => (prev ? { ...prev, academicStatus: e.target.value as AcademicStatus } : prev))
-                }
-                required
-              >
-                {(Object.keys(ACADEMIC_STATUS_LABELS) as AcademicStatus[]).map((status) => (
-                  <option key={status} value={status}>
-                    {ACADEMIC_STATUS_LABELS[status]}
-                  </option>
-                ))}
-              </select>
+              {student.academic_status === 'GRADUATED' ? (
+                <>
+                  <span className="badge badge-published">{ACADEMIC_STATUS_LABELS.GRADUATED}</span>
+                  <small>
+                    Học viên đã tốt nghiệp — trạng thái không thể thay đổi qua form này. Việc xác nhận/hủy tốt
+                    nghiệp chỉ thực hiện qua trang Xét tốt nghiệp (Graduation Dashboard).
+                  </small>
+                </>
+              ) : (
+                <>
+                  <select
+                    value={form.academicStatus}
+                    onChange={(e) =>
+                      setForm((prev) => (prev ? { ...prev, academicStatus: e.target.value as AcademicStatus } : prev))
+                    }
+                    required
+                  >
+                    {EDITABLE_ACADEMIC_STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {ACADEMIC_STATUS_LABELS[status]}
+                      </option>
+                    ))}
+                  </select>
+                  <small>
+                    Để xác nhận tốt nghiệp, dùng chức năng Xác nhận tốt nghiệp trên trang Xét tốt nghiệp — không
+                    đặt qua form này.
+                  </small>
+                </>
+              )}
             </label>
-            <button type="submit" disabled={submitting}>
+            <button type="submit" disabled={submitting || student.academic_status === 'GRADUATED'}>
               {submitting ? 'Đang lưu…' : 'Lưu hồ sơ học viên'}
             </button>
             {formError ? <p className="error-text">{formError}</p> : null}
